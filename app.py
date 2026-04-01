@@ -2,37 +2,47 @@ import streamlit as st
 import numpy as np
 import pickle
 
-# Load models
+# Load model & scalers
 model = pickle.load(open('model.pkl', 'rb'))
 sc = pickle.load(open('standscaler.pkl', 'rb'))
 ms = pickle.load(open('minmaxscaler.pkl', 'rb'))
 
+# Page config
+st.set_page_config(page_title="Crop Recommendation", layout="wide")
+
 # Title
-st.title("🌾 Crop Recommendation System")
+st.markdown("<h1 style='text-align: center; color: green;'>🌱 Crop Recommendation</h1>", unsafe_allow_html=True)
 
-st.write("Enter the required soil and environmental parameters:")
+# Layout (2 columns like your image)
+col1, col2 = st.columns(2)
 
-# Input fields
-N = st.number_input("Nitrogen")
-P = st.number_input("Phosphorus")
-K = st.number_input("Potassium")
-temp = st.number_input("Temperature")
-humidity = st.number_input("Humidity")
-ph = st.number_input("pH")
-rainfall = st.number_input("Rainfall")
+with col1:
+    N = st.number_input("Nitrogen", placeholder="Enter Nitrogen")
+    temp = st.number_input("Temperature (°C)")
+    rainfall = st.number_input("Rainfall (mm)")
 
-# Predict button
-if st.button("Predict Crop"):
+with col2:
+    P = st.number_input("Phosphorus")
+    K = st.number_input("Potassium")
+    humidity = st.number_input("Humidity (%)")
+    ph = st.number_input("pH")
 
+# Button centered
+st.markdown("<br>", unsafe_allow_html=True)
+center = st.columns([1,2,1])
+
+with center[1]:
+    predict_btn = st.button("Get Recommendation")
+
+# Prediction
+if predict_btn:
     feature_list = [N, P, K, temp, humidity, ph, rainfall]
     single_pred = np.array(feature_list).reshape(1, -1)
 
     try:
-        # Scaling
-        scaled_features = ms.transform(single_pred)
-        final_features = sc.transform(scaled_features)
-
-        prediction = model.predict(final_features)
+        scaled = ms.transform(single_pred)
+        final = sc.transform(scaled)
+        prediction = model.predict(final)
 
         crop_dict = {
             1: "Rice", 2: "Maize", 3: "Jute", 4: "Cotton", 5: "Coconut",
@@ -45,9 +55,14 @@ if st.button("Predict Crop"):
 
         if prediction[0] in crop_dict:
             crop = crop_dict[prediction[0]]
-            st.success(f"🌱 {crop} is the best crop to be cultivated.")
+            st.success(f"🌾 {crop} is best crop to cultivate")
+            st.balloons()
         else:
-            st.error("❌ Could not determine crop.")
+            st.error("❌ Could not determine crop")
 
     except Exception as e:
         st.error(f"Error: {e}")
+
+# Image at bottom
+st.markdown("---")
+st.image("crop.jpg", use_column_width=True)
