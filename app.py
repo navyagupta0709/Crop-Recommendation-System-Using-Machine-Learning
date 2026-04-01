@@ -11,30 +11,35 @@ ms = pickle.load(open('minmaxscaler.pkl', 'rb'))
 st.set_page_config(page_title="Crop Recommendation", layout="wide")
 
 # Title
-st.markdown("<h1 style='text-align: center; color: green;'>🌱 Crop Recommendation</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<h1 style='text-align: center; color: green;'>🌱 Crop Recommendation</h1>",
+    unsafe_allow_html=True
+)
 
-# Layout (2 columns like your image)
+st.markdown("### Enter Soil & Weather Details")
+
+# 2-column layout (same as your UI)
 col1, col2 = st.columns(2)
 
 with col1:
     N = st.number_input("Nitrogen", placeholder="Enter Nitrogen")
-    temp = st.number_input("Temperature (°C)")
-    rainfall = st.number_input("Rainfall (mm)")
+    temp = st.number_input("Temperature (°C)", placeholder="Enter Temperature")
+    rainfall = st.number_input("Rainfall (mm)", placeholder="Enter Rainfall")
 
 with col2:
-    P = st.number_input("Phosphorus")
-    K = st.number_input("Potassium")
-    humidity = st.number_input("Humidity (%)")
-    ph = st.number_input("pH")
+    P = st.number_input("Phosphorus", placeholder="Enter Phosphorus")
+    K = st.number_input("Potassium", placeholder="Enter Potassium")
+    humidity = st.number_input("Humidity (%)", placeholder="Enter Humidity")
+    ph = st.number_input("pH", placeholder="Enter pH value")
 
-# Button centered
+# Center button
 st.markdown("<br>", unsafe_allow_html=True)
-center = st.columns([1,2,1])
+c1, c2, c3 = st.columns([1,2,1])
 
-with center[1]:
+with c2:
     predict_btn = st.button("Get Recommendation")
 
-# Prediction
+# Prediction logic
 if predict_btn:
     feature_list = [N, P, K, temp, humidity, ph, rainfall]
     single_pred = np.array(feature_list).reshape(1, -1)
@@ -53,16 +58,14 @@ if predict_btn:
             20: "Kidneybeans", 21: "Chickpea", 22: "Coffee"
         }
 
+        st.markdown("---")
+
         if prediction[0] in crop_dict:
             crop = crop_dict[prediction[0]]
-            st.success(f"🌾 {crop} is best crop to cultivate")
+            st.success(f"🌾 {crop} is the best crop to cultivate")
             st.balloons()
         else:
             st.error("❌ Could not determine crop")
 
     except Exception as e:
         st.error(f"Error: {e}")
-
-# Image at bottom
-st.markdown("---")
-st.image("crop.jpg", use_column_width=True)
